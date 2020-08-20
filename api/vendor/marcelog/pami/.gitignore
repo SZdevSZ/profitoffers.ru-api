@@ -1,0 +1,10 @@
+composer.lock
+vendor
+.idea
+.buildpath
+.project
+.settings
+build
+docs/examples/quickstart/log.log
+resources/php.ini
+

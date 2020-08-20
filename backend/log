@@ -1,0 +1,11 @@
+07th 2020f March 2020 05:0:26 PM Action: Originate 
+Set: CDR(userfield)=test
+Channel: Local/89881161760@from-internal
+MaxRetries: 0
+RetryTime: 1
+WaitTime: 30
+Context: from-internal
+Extension: 2011
+Callerid: 89881161760 
+Account: test
+Priority: 1
