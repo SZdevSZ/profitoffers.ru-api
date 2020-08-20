@@ -390,7 +390,9 @@ switch ($_GET['action']) {
 	case 'setMemberPause':
 		$resultMessage = array('result' => array(0 =>'error: agent does not exist'));
 		$SIPPeers = $action->getSIPPeers();
-		if (isset($_GET['agent']) && array_key_exists($_GET['agent'], $SIPPeers)) {
+		//if (isset($_GET['agent']) && array_key_exists($_GET['agent'], $SIPPeers)) {
+        if (isset($_GET['agent'])) {
+            }
 			$setMemberPause = $action->setMemberPause($_GET['agent']);
 			$resultMessage = array('result'=> array(0 => $setMemberPause));
 		  	$glueMessage = $httpMessage200 + $resultMessage + $currentAPIUser;
@@ -416,7 +418,8 @@ switch ($_GET['action']) {
 	case 'unsetMemberPause':
 		$resultMessage = array('result' => array(0 =>'error: agent does not exist'));
 		$SIPPeers = $action->getSIPPeers();
-		if (isset($_GET['agent']) && array_key_exists($_GET['agent'], $SIPPeers)) {
+		//if (isset($_GET['agent']) && array_key_exists($_GET['agent'], $SIPPeers)) {
+        if (isset($_GET['agent'])) {
 			$unsetMemberPause = $action->unsetMemberPause($_GET['agent']);
 			$resultMessage = array('result'=> array(0 => $unsetMemberPause));
 		  	$glueMessage = $httpMessage200 + $resultMessage + $currentAPIUser;
