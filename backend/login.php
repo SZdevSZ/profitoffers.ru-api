@@ -148,7 +148,7 @@
           </div> -->
           <div id="userAdministration" class="tabcontent container-fluid" >
             <!-- <div  class="container-fluid mx-auto mt-3 card bg-light shadow-lg rounded" id="usersPanel" id="usersPanel">
-              <?php// require_once 'usersPanel.php';?>
+              <?php // require_once 'usersPanel.php'; ?>
             </div> -->
           </div>
           <div id="queueManagement" class="tabcontent container-fluid" >

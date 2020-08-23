@@ -304,7 +304,7 @@ switch ($_GET['action']) {
 		$SIPPeers = $action->getSIPPeers();
 		$queueList = $action->getQueuesList();
 		//if (isset($_GET['queue']) && isset($_GET['agent']) && in_array($_GET['queue'], $queueList) && array_key_exists($_GET['agent'], $SIPPeers)) {
-		if (isset($_GET['queue']) && isset($_GET['agent']) && in_array($_GET['queue'], $queueList) ) {
+		if (isset($_GET['queue']) && isset($_GET['agent'])&& $_GET['agent'] != '' && in_array($_GET['queue'], $queueList) ) {
 			$memberList = $action->getMemberList($_GET['queue']);
 			if (in_array($_GET['agent'], $memberList)){
 				$resultMessage = array('result' => array(0 =>'error: Unable to add interface: Already there'));
