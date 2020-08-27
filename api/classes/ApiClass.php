@@ -23,7 +23,12 @@ use PAMI\Message\Action\OriginateAction;
 use PAMI\Message\Action\SIPPeersAction;
 use PAMI\Message\OutgoingMessage;
 use PAMI\Exception\PAMIException;
+use PAMI\Message\Action\PJSIPShowEndpointsAction;
+use PAMI\Message\Event\EndpointListCompleteEvent;
+use PAMI\Message\Event\EndpointListEvent;
+use PAMI\Message\Action\CoreShowChannelsAction;
 require $_SERVER['DOCUMENT_ROOT'] .SITEDIR."api/vendor/autoload.php";
+require_once $_SERVER['DOCUMENT_ROOT'] .SITEDIR."api/src/PAMI/Message/Action/PJSIPShowEndpointsAction.php";
 
 class A implements IEventListener
 {
@@ -499,6 +504,33 @@ class AMIActions
         return $result; 
     }
 
+    /**
+    * Will return member list endpoints
+    * @param 
+    * @return array,string $result
+    */        
+    public function getPJSIPShowEndpoints()
+    {
+        $result = array();
+        $pamiClient = new PamiClient($this->options);
+        $pamiClient->open();
+        $result = $pamiClient->send(new PJSIPShowEndpointsAction())->getEvents();
+        	return $result;
+    }
+
+    /**
+    * Will return channels list
+    * @param 
+    * @return array,string $result
+    */  
+    public function getChannelsList()
+    {
+    	$result = array();
+    	$pamiClient = new PamiClient($this->options);
+    	$pamiClient->open();
+    	$result = $pamiClient->send(new CoreShowChannelsAction())->getEvents();
+    		return $result;
+    }
 
     public function all($queue)
     {
