@@ -328,43 +328,45 @@ switch ($_GET['action']) {
 
 	case 'getChannelsList':
 	$resultMessage = array('result' => array(0 =>'error: display type not set or type not support'));
-    if (isset($_GET['display']) || $_GET['display'] == 'list' || $_GET['display'] == 'count' && isset($_GET['ext']) ) {
-        $res = array();
-        $arrChannelsList = $action->getChannelsList();
-        $countArrChannelsList = count($arrChannelsList);
-        $i = 0;
-        while ($i <= $countArrChannelsList-1) {
-        	$arrChannelsListKeys = $arrChannelsList[$i]->getKeys();
-        	$currentChannelName = $arrChannelsListKeys['channel'];
-        	$containsChannel = strpos($currentChannelName, $_GET['ext']);
-        	if ($containsChannel === false) {
-        	}
-        		else{
-        			array_push($result, $currentChannelName);
-        		}
-        	$i++;
-        }
-        if ($result == null){
-        	$countChannels = '0';
-        }
-        	else{
-        		$countChannels = count($result);
-        	}
-        if ($_GET['display'] == 'list'){
-        	$resultMessage = array('result'=> $result);
-        }
-        	else{
-        		$resultMessage = array('result'=> $countChannels);
-        	}
-	    	$glueMessage = $httpMessage200 + $resultMessage + $currentAPIUser;
-	    	$result = json_encode($glueMessage, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-	    	print_r($result);
-	    	$result = json_encode($glueMessage);
-	    	$messageLog = ['get=' => $_GET, 'response=' => $result];
-        	$addLogging = $objLogger->addMessage($typeLogInfo, $systemLog, $messageLog);
-	    	unset($PJSIPPeers);
-	    	unset($objLogger);
-	    	break;
+	if (isset($_GET['ext']) && $_GET['ext'] != '') {
+        if (isset($_GET['display']) || $_GET['display'] == 'list' || $_GET['display'] == 'count'  ) {
+            $res = array();
+            $arrChannelsList = $action->getChannelsList();
+            $countArrChannelsList = count($arrChannelsList);
+            $i = 0;
+            while ($i <= $countArrChannelsList-1) {
+            	$arrChannelsListKeys = $arrChannelsList[$i]->getKeys();
+            	$currentChannelName = $arrChannelsListKeys['channel'];
+            	$containsChannel = strpos($currentChannelName, $_GET['ext']);
+            	if ($containsChannel === false) {
+            	}
+            		else{
+            			array_push($result, $currentChannelName);
+            		}
+            	$i++;
+            }
+            if ($result == null){
+            	$countChannels = '0';
+            }
+            	else{
+            		$countChannels = count($result);
+            	}
+            if ($_GET['display'] == 'list'){
+            	$resultMessage = array('result'=> $result);
+            }
+            	else{
+            		$resultMessage = array('result'=> $countChannels);
+            	}
+	        	$glueMessage = $httpMessage200 + $resultMessage + $currentAPIUser;
+	        	$result = json_encode($glueMessage, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+	        	print_r($result);
+	        	$result = json_encode($glueMessage);
+	        	$messageLog = ['get=' => $_GET, 'response=' => $result];
+            	$addLogging = $objLogger->addMessage($typeLogInfo, $systemLog, $messageLog);
+	        	unset($PJSIPPeers);
+	        	unset($objLogger);
+	        	break;
+	    }
 	}
 	$glueMessage = $httpMessage400 + $resultMessage + $currentAPIUser;
     $result = json_encode($glueMessage, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -658,6 +660,55 @@ switch ($_GET['action']) {
      	unset($CDR);
 	 	unset($queueList);
 	 	unset($objLogger);
+		break;
+
+	case 'getInternalCallList':
+		$SIPChannels = $action->getSIPPeers();
+		$resultPJSIP = array();
+		$arrListEndpoints = $action->getPJSIPShowEndpoints();
+		$countArrListEndpoints = count($arrListEndpoints);
+		$i = 0;
+		while ($i <= $countArrListEndpoints-2) {
+			$arrListEndpointsKeys = $arrListEndpoints[$i]->getKeys();
+			$currentEndpointKey = $arrListEndpointsKeys['objectname'];
+			array_push($resultPJSIP, $currentEndpointKey);
+			$i++;
+		}
+		$result = array();
+		$arrChannelsList = $action->getChannelsList();
+		$countArrChannelsList = count($arrChannelsList);
+		$i = 0;
+		
+		while ($i <= $countArrChannelsList-1) {
+			$arrChannelsListKeys = $arrChannelsList[$i]->getKeys();
+			if (!isset($arrChannelsListKeys['calleridname']) || $arrChannelsListKeys['calleridname'] == '') {
+				$arrChannelsListKeys['calleridname'] = 'NULL';
+			}
+			if (!isset($arrChannelsListKeys['connectedlinenum']) || $arrChannelsListKeys['connectedlinenum'] == '') {
+				$arrChannelsListKeys['connectedlinenum'] = 'NULL';
+			}
+			if (in_array($arrChannelsListKeys['calleridname'], $resultPJSIP) || in_array($arrChannelsListKeys['calleridname'], $SIPChannels)) {
+				$key = $arrChannelsListKeys['calleridname'];
+				$internalCallList[$key] = $arrChannelsListKeys['connectedlinenum'];
+			}
+			elseif (in_array($arrChannelsListKeys['connectedlinenum'], $resultPJSIP) || in_array($arrChannelsListKeys['connectedlinenum'], $SIPChannels)) {
+				$returnValue = preg_split('/[A-Z]+./ms', $arrChannelsListKeys['applicationdata'], -1, PREG_SPLIT_NO_EMPTY);
+				$roughNumberPhone = $returnValue[0];
+				$numberPhone = mb_substr($roughNumberPhone, 0, -1);
+				$key = $arrChannelsListKeys['connectedlinenum']; 
+				$internalCallList[$key] = $numberPhone;
+			}
+			$i++;
+		}
+		$resultMessage = array('result'=> $internalCallList);
+		$glueMessage = $httpMessage200 + $resultMessage + $currentAPIUser;
+		$result = json_encode($glueMessage, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+		print_r($result);
+		$result = json_encode($glueMessage);
+		$messageLog = ['get=' => $_GET, 'response=' => $result];
+    	$addLogging = $objLogger->addMessage($typeLogInfo, $systemLog, $messageLog);
+		unset($arrChannelsList);
+		unset($objLogger);
 		break;
 
 	default:

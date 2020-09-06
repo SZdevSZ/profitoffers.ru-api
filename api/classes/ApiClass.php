@@ -48,7 +48,7 @@ class AMIActions
             'username' => 'ams',
             'secret' => 'amsAMS!@#',
             'connect_timeout' => 10000,
-            'read_timeout' => 10000
+            'read_timeout' => 35000
         ];
 
     /**

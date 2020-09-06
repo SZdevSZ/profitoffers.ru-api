@@ -81,7 +81,41 @@ class AMIActions
     		return $result;
 
     }
+
+    /**
+    * Will return list all SIP peers
+    * @param no params
+    * @return array $result
+    */
+    public function getSIPPeers()
+    {
+        $result = array();
+        $pamiClient = new PamiClient($this->options);
+        $pamiClient->open();
+        //var_dump($a->send(new SIPPeersAction()));
+        $arr = $pamiClient->send(new SIPPeersAction())->getEvents();
+        $pamiClient->close();
+        $countArr = count($arr);
+        $i = 1;
+        $countArr = ($countArr-1);
+                while ($i < $countArr) {
+                    $sipName = ($arr[$i]->getKey('objectname'));
+                    $sipStatus = ($arr[$i]->getKey('status'));
+                    if (isset($sipName)){
+                        $result[$sipName] = $sipStatus;
+                        $i++;
+                    }
+                    else{
+                           $i++; 
+                        }
+                }
+        unset($arr);
+        return $result; 
+    }
+
 }
+
+
 ////TEST CODE
 
 $action =  new AMIActions();
@@ -125,7 +159,48 @@ while ($i <= $countArrChannelsList-1) {
 	$countChannels = count($result);
 	echo "count channels:".$countChannels;
 	echo '</pre>';
-//echo'<br>';
-//var_dump($arrChannelsList);
-//
+echo '______________________'.'<br>';
+echo'<pre>';
+
+
+$resultPJSIP = array();
+$arrListEndpoints = $action->getPJSIPShowEndpoints();
+echo '<pre>';
+$countArrListEndpoints = count($arrListEndpoints);
+$i = 0;
+while ($i <= $countArrListEndpoints-2) {
+	$arrListEndpointsKeys = $arrListEndpoints[$i]->getKeys();
+	$currentEndpointKey = $arrListEndpointsKeys['objectname'];
+	array_push($resultPJSIP, $currentEndpointKey);
+	$i++;
+}
+print_r($resultPJSIP);
+
+echo '______________________SIP'.'<br>';
+$SIPChannels = $action->getSIPPeers();
+print_r($SIPChannels);
+echo '______________________test'.'<br>';
+
+$result = array();
+$arrChannelsList = $action->getChannelsList();
+$countArrChannelsList = count($arrChannelsList);
+$i = 0;
+
+while ($i <= $countArrChannelsList-1) {
+	$arrChannelsListKeys = $arrChannelsList[$i]->getKeys();
+	if (in_array($arrChannelsListKeys['calleridname'], $resultPJSIP) || in_array($arrChannelsListKeys['calleridname'], $SIPChannels)) {
+		$key = $arrChannelsListKeys['calleridname'];
+		$result[$key] =	$arrChannelsListKeys['connectedlinenum'];
+	}
+	elseif (in_array($arrChannelsListKeys['connectedlinenum'], $resultPJSIP) || in_array($arrChannelsListKeys['connectedlinenum'], $SIPChannels)) {
+		$returnValue = preg_split('/[A-Z]+./ms', $arrChannelsListKeys['applicationdata'], -1, PREG_SPLIT_NO_EMPTY);
+		$roughNumberPhone = $returnValue[0];
+		$numberPhone = mb_substr($roughNumberPhone, 0, -1);
+		$key = $arrChannelsListKeys['connectedlinenum']; 
+		$result[$key] = $numberPhone;
+	}
+	$i++;
+}
+	print_r($result);
+echo'</pre>';
 ?>
